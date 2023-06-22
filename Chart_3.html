@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.amcharts.com/lib/4/core.js"></script>
+    <script src="https://www.amcharts.com/lib/4/charts.js"></script>
+    <script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
+
+    <title>Top 5 Smart Contract in History</title>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            margin: 0;
+            background-color: #0F152F;
+        }
+
+        #chartdiv {
+            /* width: 100%; */
+            height: calc(100vh - 200px);
+            background-color: #0F244F;
+            border-radius: 50px;
+            margin: 0 5%;
+        }
+
+        text, tspan {
+            color: white;
+        }
+
+        h1 {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+
+        h2 {
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .headerDiv {
+            display: flex;
+            padding: 1% 8% 0 8%;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cmclogo {
+            position: relative;
+            top: 30px;
+            width: 15%;
+            height: 8%;
+        }
+    </style>
+</head>
+<body>
+    <div class="headerDiv">
+        <div>
+            <h1>Top 5 Smart Contract in History</h1>
+            <h2>2018-2023 Market Cap in USD</h2>
+        </div>
+        <img src="./cmcLogo.png" alt="no logo" class="cmclogo">
+    </div>
+    <div id="chartdiv"></div>
+</body>
+<script>
+    /**
+     * ---------------------------------------
+     * This demo was created using amCharts 4.
+     * 
+     * For more information visit:
+     * https://www.amcharts.com/
+     * 
+     * Documentation is available at:
+     * https://www.amcharts.com/docs/v4/
+     * ---------------------------------------|
+     */
+
+    // Themes begin
+    am4core.useTheme(am4themes_animated);
+    // Themes end
+    am4core.globalAdapter.addAll(2)
+    var chart = am4core.create("chartdiv", am4charts.XYChart);
+    chart.padding(40, 40, 40, 40);
+    chart.numberFormatter.numberFormat = "#,###.";
+    var label = chart.plotContainer.createChild(am4core.Label);
+    label.x = am4core.percent(97);
+    label.y = am4core.percent(95);
+    label.horizontalCenter = "right";
+    label.verticalCenter = "middle";
+    label.dx = -15;
+    label.fontSize = 50;
+
+    var playButton = chart.plotContainer.createChild(am4core.PlayButton);
+    playButton.x = am4core.percent(97);
+    playButton.y = am4core.percent(95);
+    playButton.dy = -100;
+    playButton.verticalCenter = "middle";
+    playButton.events.on("toggled", function(event) {
+    if (event.target.isActive) {
+        play();
+    }
+    else {
+        stop();
+    }
+    })
+
+    var stepDuration = 4000;
+
+    var categoryAxis = chart.yAxes.push(new am4charts.CategoryAxis());
+    categoryAxis.renderer.grid.template.location = 0;
+    categoryAxis.dataFields.category = "crypto_name";
+    categoryAxis.renderer.minGridDistance = 1;
+    categoryAxis.renderer.inversed = true;
+    categoryAxis.renderer.grid.template.disabled = false;
+    categoryAxis.renderer.labels.template.fill = am4core.color("#fff");
+
+    var valueAxis = chart.xAxes.push(new am4charts.ValueAxis());
+    valueAxis.min = 0;
+    valueAxis.rangeChangeEasing = am4core.ease.linear;
+    valueAxis.rangeChangeDuration = stepDuration;
+    valueAxis.extraMax = 0.2;
+    valueAxis.calculateTotals = true;
+    valueAxis.renderer.labels.template.adapter.add("text", function(text) {
+        var labelValue = parseInt(String(text).split(',').join(""))
+        // if (newText / )
+        // return parseInt(newText) / 100000 + "%";
+        return Math.abs(Number(labelValue)) >= 1.0e+11
+        
+        ? (Math.abs(Number(labelValue)) / 1.0e+12).toFixed(2) + " Trillion"
+        : Math.abs(Number(labelValue)) >= 1.0e+8
+
+        ? (Math.abs(Number(labelValue)) / 1.0e+9).toFixed(1) + " Billion"
+        // Six Zeroes for Millions 
+        : Math.abs(Number(labelValue)) >= 1.0e+5
+
+        ? (Math.abs(Number(labelValue)) / 1.0e+6).toFixed(1) + " Million"
+        // Three Zeroes for Thousands
+        : Math.abs(Number(labelValue)) >= 1.0e+2
+
+        ? (Math.abs(Number(labelValue)) / 1.0e+3).toFixed(1) + "K"
+
+        : Math.abs(Number(labelValue));
+    });
+    valueAxis.renderer.labels.template.fill = am4core.color("#588D90");
+
+    var series = chart.series.push(new am4charts.ColumnSeries());
+    series.dataFields.categoryY = "crypto_name";
+    series.dataFields.valueX = "market_cap";
+    series.dataFields.valueLogo = "logo_link";
+    series.dataFields.valueColor = "color";
+    series.columns.template.propertyFields.fill = "color";
+    series.columns.template.propertyFields.stroke = "color";
+    series.columns.template.tooltipText = "{valueX}"
+    series.columns.template.strokeOpacity = 0;
+    series.columns.template.column.cornerRadiusBottomRight = 5;
+    series.columns.maxColumns = 1
+    series.columns.template.column.cornerRadiusTopRight = 5;
+    series.interpolationDuration = stepDuration;
+    series.interpolationEasing = am4core.ease.linear;
+    var labelBullet = series.bullets.push(new am4charts.LabelBullet())
+    var image = labelBullet.createChild(am4core.Image);
+    image.propertyFields.href = "logo_link";
+    image.width = 30;
+    image.height = 30;
+    image.horizontalCenter = "middle";
+    image.verticalCenter = "middle";
+    image.dx = 30;
+    labelBullet.label.horizontalCenter = "right";
+    labelBullet.label.text = "{values.valueX.workingValue}";
+    labelBullet.label.textAlign = "end";
+    labelBullet.label.dx = 160;
+    labelBullet.label.maxColumns = 1;
+    labelBullet.label.truncate = false;
+    labelBullet.label.hideOversized = false;
+    labelBullet.label.fill = am4core.color("#fff");
+    chart.zoomOutButton.disabled = true;
+
+    // as by default columns of the same series are of the same color, we add adapter which takes colors from chart.colors color set
+    series.columns.template.adapter.add("fill", function(fill, target) {
+        if (target.dataItem.dataContext["color"]) {
+            return target.dataItem.dataContext["color"];
+        } else {
+            // return chart.colors.getIndex(target.dataItem.index);
+            return chart.colors.next();
+        }
+    });
+
+    var year = 2017;
+    label.text = year.toString();
+    label.fill = am4core.color("#fff");
+    label.dy = -100;
+    label.fontSize = "11rem";
+    label.fontWeight = "bold";
+
+    var interval;
+
+    function play() {
+        interval = setInterval(function(){
+            nextYear();
+        }, stepDuration)
+        nextYear();
+    }
+
+    function stop() {
+        if (interval) {
+            clearInterval(interval);
+        }
+    }
+
+    function nextYear() {
+        year++
+
+        if (year > 2023) {
+            // year = 2012;
+            stop();
+        }
+
+        var newData = allData[year];
+        var itemsWithNonZero = 0;
+        for (var i = 0; i < chart.data.length; i++) {
+            chart.data[i].logo_link = newData[i].logo_link;
+            chart.data[i].color = newData[i].color;
+            chart.data[i].market_cap = newData[i].market_cap;
+            if (chart.data[i].market_cap > 0) {
+            itemsWithNonZero++;
+            
+            }
+        }
+        
+            if(itemsWithNonZero > 20){
+            itemsWithNonZero = 20
+        }
+        
+        
+
+        if (year == 2017) {
+            series.interpolationDuration = stepDuration / 4;
+            valueAxis.rangeChangeDuration = stepDuration / 4;
+        }
+        else {
+            series.interpolationDuration = stepDuration;
+            valueAxis.rangeChangeDuration = stepDuration;
+        }
+
+        chart.invalidateRawData();
+        label.text = year.toString();
+
+        categoryAxis.zoom({ start: 0, end: itemsWithNonZero / categoryAxis.dataItems.length });
+    }
+
+
+    categoryAxis.sortBySeries = series;
+
+    var allData = {
+       "2017": [
+        {
+            "crypto_name": "Ethereum",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+            "crypto_name": "Cardano",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+            "crypto_name": "Stellar",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+            "crypto_name": "Neo",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+            "crypto_name": "EOS",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+            "crypto_name": "BNB",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+            "crypto_name": "Ethereum Classic",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+            "crypto_name": "Chainlink",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+            "crypto_name": "Avalanche",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        }
+       ],
+       "2018": [
+       {
+            "crypto_name": "Ethereum",
+            "color": "",
+            "market_cap": 108848638400,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+            "crypto_name": "Cardano",
+            "color": "",
+            "market_cap": 13464316636,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+            "crypto_name": "Stellar",
+            "color": "",
+            "market_cap": 9948367356,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+            "crypto_name": "Neo",
+            "color": "",
+            "market_cap": 9474270000,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+            "crypto_name": "EOS",
+            "color": "",
+            "market_cap": 7806255291,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+            "crypto_name": "BNB",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+            "crypto_name": "Ethereum Classic",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+            "crypto_name": "Chainlink",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+            "crypto_name": "Avalanche",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        }
+       ],
+       "2019": [
+       {
+            "crypto_name": "Ethereum",
+            "color": "",
+            "market_cap": 11204735502,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+            "crypto_name": "Cardano",
+            "color": "",
+            "market_cap": 994926538,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+            "crypto_name": "Stellar",
+            "color": "",
+            "market_cap": 1583825650,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+            "crypto_name": "Neo",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+            "crypto_name": "EOS",
+            "color": "",
+            "market_cap": 2103041931,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+            "crypto_name": "BNB",
+            "color": "",
+            "market_cap": 809728264,
+            "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+            "crypto_name": "Ethereum Classic",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+            "crypto_name": "Chainlink",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+            "crypto_name": "Avalanche",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        }
+       ],
+       "2020": [
+       {
+            "crypto_name": "Ethereum",
+            "color": "",
+            "market_cap": 19729633078,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+            "crypto_name": "Cardano",
+            "color": "",
+            "market_cap": 1394699437,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+            "crypto_name": "Stellar",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+            "crypto_name": "Neo",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+            "crypto_name": "EOS",
+            "color": "",
+            "market_cap": 3936220904,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+            "crypto_name": "BNB",
+            "color": "",
+            "market_cap": 2832476037,
+            "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+            "crypto_name": "Ethereum Classic",
+            "color": "",
+            "market_cap": 1314450265,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+            "crypto_name": "Chainlink",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+            "crypto_name": "Avalanche",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        }
+       ],
+       "2021": [
+       {
+            "crypto_name": "Ethereum",
+            "color": "",
+            "market_cap": 150543956657,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+            "crypto_name": "Cardano",
+            "color": "",
+            "market_cap": 10730622858,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+            "crypto_name": "Stellar",
+            "color": "",
+            "market_cap": 6802946003,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+            "crypto_name": "Neo",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+            "crypto_name": "EOS",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+            "crypto_name": "BNB",
+            "color": "",
+            "market_cap": 6842092373,
+            "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+            "crypto_name": "Ethereum Classic",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+            "crypto_name": "Chainlink",
+            "color": "",
+            "market_cap": 9129983491,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+            "crypto_name": "Avalanche",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        }
+       ],
+       "2022": [
+       {
+            "crypto_name": "Ethereum",
+            "color": "",
+            "market_cap": 320959888865,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+            "crypto_name": "Cardano",
+            "color": "",
+            "market_cap": 35321862362,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+            "crypto_name": "Stellar",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+            "crypto_name": "Neo",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+            "crypto_name": "EOS",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+            "crypto_name": "BNB",
+            "color": "",
+            "market_cap": 61964576590,
+            "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+            "crypto_name": "Ethereum Classic",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+            "crypto_name": "Chainlink",
+            "color": "",
+            "market_cap": 8051443980,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+            "crypto_name": "Avalanche",
+            "color": "",
+            "market_cap": 17147869341,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        }
+       ],
+       "2023": [
+       {
+            "crypto_name": "Ethereum",
+            "color": "",
+            "market_cap": 221982607204,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+            "crypto_name": "Cardano",
+            "color": "",
+            "market_cap": 11278744140,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+            "crypto_name": "Stellar",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+            "crypto_name": "Neo",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+            "crypto_name": "EOS",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+            "crypto_name": "BNB",
+            "color": "",
+            "market_cap": 40857170518,
+            "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+            "crypto_name": "Ethereum Classic",
+            "color": "",
+            "market_cap": 0,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+            "crypto_name": "Chainlink",
+            "color": "",
+            "market_cap": 3100176512,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+            "crypto_name": "Avalanche",
+            "color": "",
+            "market_cap": 4804600620,
+            "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        }
+       ]
+    }
+
+    chart.data = JSON.parse(JSON.stringify(allData[year]));
+    categoryAxis.zoom({ start: 0, end: 1 / chart.data.length });
+
+    series.events.on("inited", function() {
+    setTimeout(function() {
+        playButton.isActive = true; // this starts interval
+    }, 0)
+    })
+</script>
+</html>

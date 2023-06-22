@@ -1,0 +1,5475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.amcharts.com/lib/4/core.js"></script>
+    <script src="https://www.amcharts.com/lib/4/charts.js"></script>
+    <script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
+
+    <title>Top 20 Coins by Market Cap in History</title>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            margin: 0;
+            background-color: #0F152F;
+        }
+
+        #chartdiv {
+            /* width: 100%; */
+            height: calc(100vh - 200px);
+            background-color: #0F244F;
+            border-radius: 50px;
+            margin: 0 5%;
+        }
+
+        text, tspan {
+            color: white;
+        }
+
+        h1 {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+
+        h2 {
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .headerDiv {
+            display: flex;
+            padding: 1% 8% 0 8%;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cmclogo {
+            position: relative;
+            top: 30px;
+            width: 15%;
+            height: 8%;
+        }
+    </style>
+</head>
+<body>
+    <div class="headerDiv">
+        <div>
+            <h1>Crypto Top 20 Coins by Market Cap in History</h1>
+            <h2>2013-2023 Market Cap in USD</h2>
+        </div>
+        <img src="./cmcLogo.png" alt="no logo" class="cmclogo">
+    </div>
+    <div id="chartdiv"></div>
+</body>
+<script>
+    /**
+     * ---------------------------------------
+     * This demo was created using amCharts 4.
+     * 
+     * For more information visit:
+     * https://www.amcharts.com/
+     * 
+     * Documentation is available at:
+     * https://www.amcharts.com/docs/v4/
+     * ---------------------------------------|
+     */
+
+    // Themes begin
+    am4core.useTheme(am4themes_animated);
+    // Themes end
+    am4core.globalAdapter.addAll(2)
+    var chart = am4core.create("chartdiv", am4charts.XYChart);
+    chart.padding(40, 40, 40, 40);
+    chart.numberFormatter.numberFormat = "#,###.";
+    var label = chart.plotContainer.createChild(am4core.Label);
+    label.x = am4core.percent(97);
+    label.y = am4core.percent(95);
+    label.horizontalCenter = "right";
+    label.verticalCenter = "middle";
+    label.dx = -15;
+    label.fontSize = 50;
+
+    var playButton = chart.plotContainer.createChild(am4core.PlayButton);
+    playButton.x = am4core.percent(97);
+    playButton.y = am4core.percent(95);
+    playButton.dy = -100;
+    playButton.verticalCenter = "middle";
+    playButton.events.on("toggled", function(event) {
+    if (event.target.isActive) {
+        play();
+    }
+    else {
+        stop();
+    }
+    })
+
+    var stepDuration = 4000;
+
+    var categoryAxis = chart.yAxes.push(new am4charts.CategoryAxis());
+    categoryAxis.renderer.grid.template.location = 0;
+    categoryAxis.dataFields.category = "crypto_name";
+    categoryAxis.renderer.minGridDistance = 1;
+    categoryAxis.renderer.inversed = true;
+    categoryAxis.renderer.grid.template.disabled = false;
+    categoryAxis.renderer.labels.template.fill = am4core.color("#fff");
+
+    var valueAxis = chart.xAxes.push(new am4charts.ValueAxis());
+    valueAxis.min = 0;
+    valueAxis.rangeChangeEasing = am4core.ease.linear;
+    valueAxis.rangeChangeDuration = stepDuration;
+    valueAxis.extraMax = 0.1;
+    // valueAxis.logarithmic = true;
+    // valueAxis.numberFormatter.numberFormat = "{#}'s'"; //'$#,###.##'
+    valueAxis.calculateTotals = true;
+    valueAxis.renderer.labels.template.adapter.add("text", function(text) {
+        var labelValue = parseInt(String(text).split(',').join(""))
+        // if (newText / )
+        // return parseInt(newText) / 100000 + "%";
+        return Math.abs(Number(labelValue)) >= 1.0e+11
+        
+        ? (Math.abs(Number(labelValue)) / 1.0e+12).toFixed(2) + " Trillion"
+        : Math.abs(Number(labelValue)) >= 1.0e+8
+
+        ? (Math.abs(Number(labelValue)) / 1.0e+9).toFixed(1) + " Billion"
+        // Six Zeroes for Millions 
+        : Math.abs(Number(labelValue)) >= 1.0e+5
+
+        ? (Math.abs(Number(labelValue)) / 1.0e+6).toFixed(1) + " Million"
+        // Three Zeroes for Thousands
+        : Math.abs(Number(labelValue)) >= 1.0e+2
+
+        ? (Math.abs(Number(labelValue)) / 1.0e+3).toFixed(1) + "K"
+
+        : Math.abs(Number(labelValue));
+    });
+    // Math.abs(Number(labelValue)) >= 1.0e+11
+        
+    //     ? (Math.abs(Number(labelValue)) / 1.0e+12).toFixed(2) + "T"
+    //     : 
+    valueAxis.renderer.labels.template.fill = am4core.color("#588D90");
+
+    var series = chart.series.push(new am4charts.ColumnSeries());
+    series.dataFields.categoryY = "crypto_name";
+    series.dataFields.valueX = "market_cap";
+    series.dataFields.valueLogo = "logo_link";
+    series.dataFields.valueColor = "color";
+    series.columns.template.propertyFields.fill = "color";
+    series.columns.template.propertyFields.stroke = "color";
+    series.columns.template.tooltipText = "{valueX}"
+    series.columns.template.strokeOpacity = 0;
+    series.columns.template.column.cornerRadiusBottomRight = 5;
+    series.columns.maxColumns = 1
+    series.columns.template.column.cornerRadiusTopRight = 5;
+    series.interpolationDuration = stepDuration;
+    series.interpolationEasing = am4core.ease.linear;
+    var labelBullet = series.bullets.push(new am4charts.LabelBullet())
+    var image = labelBullet.createChild(am4core.Image);
+    image.propertyFields.href = "logo_link";
+    image.width = 22;
+    image.height = 22;
+    image.horizontalCenter = "middle";
+    image.verticalCenter = "middle";
+    image.dx = 30;
+    labelBullet.label.horizontalCenter = "right";
+    labelBullet.label.text = "{values.valueX.workingValue}";
+    labelBullet.label.textAlign = "end";
+    labelBullet.label.dx = 168;
+    labelBullet.label.maxColumns = 1;
+    labelBullet.label.truncate = false;
+    labelBullet.label.hideOversized = false;
+    labelBullet.label.fill = am4core.color("#fff");
+    chart.zoomOutButton.disabled = true;
+
+    // as by default columns of the same series are of the same color, we add adapter which takes colors from chart.colors color set
+    series.columns.template.adapter.add("fill", function(fill, target) {
+        if (target.dataItem.dataContext["color"]) {
+            return target.dataItem.dataContext["color"];
+        } else {
+            // return chart.colors.getIndex(target.dataItem.index);
+            return chart.colors.next();
+        }
+    });
+
+    var year = 2012;
+    label.text = year.toString();
+    label.fill = am4core.color("#fff");
+    label.dy = -100;
+    label.fontSize = "11rem";
+    label.fontWeight = "bold";
+
+    var interval;
+
+    function play() {
+        interval = setInterval(function(){
+            nextYear();
+        }, stepDuration)
+        nextYear();
+    }
+
+    function stop() {
+        if (interval) {
+            clearInterval(interval);
+        }
+    }
+
+    function nextYear() {
+        year++
+
+        if (year > 2023 && !repeatFlag) {
+            // year = 2012;
+            stop();
+        }
+
+        var newData = allData[year];
+        var itemsWithNonZero = 0;
+        for (var i = 0; i < chart.data.length; i++) {
+            chart.data[i].logo_link = newData[i].logo_link;
+            chart.data[i].color = newData[i].color;
+            chart.data[i].market_cap = newData[i].market_cap;
+            if (chart.data[i].market_cap > 0) {
+            itemsWithNonZero++;
+            
+            }
+        }
+        
+            if(itemsWithNonZero > 20){
+            itemsWithNonZero = 20
+        }
+        
+        
+
+        if (year == 2012) {
+            series.interpolationDuration = stepDuration / 4;
+            valueAxis.rangeChangeDuration = stepDuration / 4;
+        }
+        if (year == 2023) {
+            series.interpolationDuration = stepDuration / 2;
+            valueAxis.rangeChangeDuration = stepDuration / 2;
+        }
+        else {
+            series.interpolationDuration = stepDuration;
+            valueAxis.rangeChangeDuration = stepDuration;
+        }
+
+        chart.invalidateRawData();
+        label.text = year.toString();
+
+        categoryAxis.zoom({ start: 0, end: itemsWithNonZero / categoryAxis.dataItems.length });
+    }
+
+
+    categoryAxis.sortBySeries = series;
+
+    var allData = {
+    "2012": [
+        {
+        "crypto_name": "Bitcoin",
+        "color": "#F7931A",
+        "market_cap": 0,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/6fbea0356edd48a4a68a4b877195443c.png"
+        },
+        {
+        "crypto_name": "Litecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2.png"
+        },
+        {
+        "crypto_name": "Namecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3.png"
+        },
+        {
+        "crypto_name": "Peercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5.png"
+        },
+        {
+        "crypto_name": "Terracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4.png"
+        },
+        {
+        "crypto_name": "Devcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7.png"
+        },
+        {
+        "crypto_name": "Novacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6.png"
+        },
+        {
+        "crypto_name": "XRP",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/52.png"
+        },
+        {
+        "crypto_name": "Dogecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png"
+        },
+        {
+        "crypto_name": "Omni",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/83.png"
+        },
+        {
+        "crypto_name": "Nxt",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/66.png"
+        },
+        {
+        "crypto_name": "BlackCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/170.png"
+        },
+        {
+        "crypto_name": "MaidSafeCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/291.png"
+        },
+        {
+        "crypto_name": "Dash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/131.png"
+        },
+        {
+        "crypto_name": "BitShares PTS",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/463.png"
+        },
+        {
+        "crypto_name": "Auroracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/148.png"
+        },
+        {
+        "crypto_name": "Quark",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/53.png"
+        },
+        {
+        "crypto_name": "Zetacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/56.png"
+        },
+        {
+        "crypto_name": "Primecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/42.png"
+        },
+        {
+        "crypto_name": "Counterparty",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/132.png"
+        },
+        {
+        "crypto_name": "Feathercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8.png"
+        },
+        {
+        "crypto_name": "Vertcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/99.png"
+        },
+        {
+        "crypto_name": "Stellar",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+        "crypto_name": "Banx",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/642.png"
+        },
+        {
+        "crypto_name": "Bytecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/372.png"
+        },
+        {
+        "crypto_name": "Monero",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/328.png"
+        },
+        {
+        "crypto_name": "YbCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/95.png"
+        },
+        {
+        "crypto_name": "NuShares",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/699.png"
+        },
+        {
+        "crypto_name": "PayCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/764.png"
+        },
+        {
+        "crypto_name": "MonaCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/213.png"
+        },
+        {
+        "crypto_name": "SuperNET",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/612.png"
+        },
+        {
+        "crypto_name": "Ethereum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+        "crypto_name": "NEM",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/873.png"
+        },
+        {
+        "crypto_name": "Factom",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1087.png"
+        },
+        {
+        "crypto_name": "HyperSpace",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1125.png"
+        },
+        {
+        "crypto_name": "Emercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "FedoraCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/87.png"
+        },
+        {
+        "crypto_name": "Steem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1230.png"
+        },
+        {
+        "crypto_name": "Augur",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1104.png"
+        },
+        {
+        "crypto_name": "Golem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1455.png"
+        },
+        {
+        "crypto_name": "Zcash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1437.png"
+        },
+        {
+        "crypto_name": "PIVX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1169.png"
+        },
+        {
+        "crypto_name": "Decred",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1168.png"
+        },
+        {
+        "crypto_name": "Stratis",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1343.png"
+        },
+        {
+        "crypto_name": "SingularDTV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1409.png"
+        },
+        {
+        "crypto_name": "Lisk",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1214.png"
+        },
+        {
+        "crypto_name": "EOS",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+        "crypto_name": "Cardano",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+        "crypto_name": "Neo",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+        "crypto_name": "TRON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1958.png"
+        },
+        {
+        "crypto_name": "IOTA",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1720.png"
+        },
+        {
+        "crypto_name": "Tether",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png"
+        },
+        {
+        "crypto_name": "VeChain",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3077.png"
+        },
+        {
+        "crypto_name": "Qtum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1684.png"
+        },
+        {
+        "crypto_name": "OMG Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1808.png"
+        },
+        {
+        "crypto_name": "ICON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2099.png"
+        },
+        {
+        "crypto_name": "Ethereum Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+        "crypto_name": "Bitcoin Cash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1831.png"
+        },
+        {
+        "crypto_name": "Bitcoin SV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3602.png"
+        },
+        {
+        "crypto_name": "Cosmos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3794.png"
+        },
+        {
+        "crypto_name": "Ontology",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2566.png"
+        },
+        {
+        "crypto_name": "TAGZ5",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4981.png"
+        },
+        {
+        "crypto_name": "Tezos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2011.png"
+        },
+        {
+        "crypto_name": "Chainlink",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+        "crypto_name": "UNUS SED LEO",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3957.png"
+        },
+        {
+        "crypto_name": "Cronos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3635.png"
+        },
+        {
+        "crypto_name": "Huobi Token",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "Storeum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4162.png"
+        },
+        {
+        "crypto_name": "BNB",
+        "market_cap": 0,
+        "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+        "crypto_name": "Uniswap",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7083.png"
+        },
+        {
+        "crypto_name": "USD Coin",
+        "market_cap": 0,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/5a8229787b5e4c809b5914eef709b59a.png"
+        },
+        {
+        "crypto_name": "Filecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2280.png"
+        },
+        {
+        "crypto_name": "Theta Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2416.png"
+        },
+        {
+        "crypto_name": "Wrapped Bitcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3717.png"
+        },
+        {
+        "crypto_name": "Solana",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png"
+        },
+        {
+        "crypto_name": "Terra Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4172.png"
+        },
+        {
+        "crypto_name": "TerraClassicUSD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7129.png"
+        },
+        {
+        "crypto_name": "Binance USD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png"
+        },
+        {
+        "crypto_name": "Avalanche",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        },
+        {
+        "crypto_name": "Polkadot",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6636.png"
+        },
+        {
+        "crypto_name": "Shiba Inu",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png"
+        },
+        {
+        "crypto_name": "Lido Staked ETH",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8085.png"
+        },
+        {
+        "crypto_name": "Dai",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png"
+        },
+        {
+        "crypto_name": "Polygon",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3890.png"
+        },
+        {
+        "crypto_name": "HEX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5015.png"
+        },
+        {
+        "crypto_name": "Wrapped TRON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/18579.png"
+        },
+    ],
+    "2013": [
+    {
+        "crypto_name": "Bitcoin",
+        "color": "#F7931A",
+        "market_cap": 1542813125,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/6fbea0356edd48a4a68a4b877195443c.png"
+        },
+        {
+        "crypto_name": "Litecoin",
+        "market_cap": 74020918,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2.png"
+        },
+        {
+        "crypto_name": "Namecoin",
+        "market_cap": 8155719,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3.png"
+        },
+        {
+        "crypto_name": "Peercoin",
+        "market_cap": 7052667,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5.png"
+        },
+        {
+        "crypto_name": "Terracoin",
+        "market_cap": 1582115,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4.png"
+        },
+        {
+        "crypto_name": "Devcoin",
+        "market_cap": 1491292,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7.png"
+        },
+        {
+        "crypto_name": "Novacoin",
+        "market_cap": 1183167,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6.png"
+        },
+        {
+        "crypto_name": "XRP",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/52.png"
+        },
+        {
+        "crypto_name": "Dogecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png"
+        },
+        {
+        "crypto_name": "Omni",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/83.png"
+        },
+        {
+        "crypto_name": "Nxt",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/66.png"
+        },
+        {
+        "crypto_name": "BlackCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/170.png"
+        },
+        {
+        "crypto_name": "MaidSafeCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/291.png"
+        },
+        {
+        "crypto_name": "Dash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/131.png"
+        },
+        {
+        "crypto_name": "BitShares PTS",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/463.png"
+        },
+        {
+        "crypto_name": "Auroracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/148.png"
+        },
+        {
+        "crypto_name": "Quark",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/53.png"
+        },
+        {
+        "crypto_name": "Zetacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/56.png"
+        },
+        {
+        "crypto_name": "Primecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/42.png"
+        },
+        {
+        "crypto_name": "Counterparty",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/132.png"
+        },
+        {
+        "crypto_name": "Feathercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8.png"
+        },
+        {
+        "crypto_name": "Vertcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/99.png"
+        },
+        {
+        "crypto_name": "Stellar",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+        "crypto_name": "Banx",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/642.png"
+        },
+        {
+        "crypto_name": "Bytecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/372.png"
+        },
+        {
+        "crypto_name": "Monero",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/328.png"
+        },
+        {
+        "crypto_name": "YbCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/95.png"
+        },
+        {
+        "crypto_name": "NuShares",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/699.png"
+        },
+        {
+        "crypto_name": "PayCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/764.png"
+        },
+        {
+        "crypto_name": "MonaCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/213.png"
+        },
+        {
+        "crypto_name": "SuperNET",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/612.png"
+        },
+        {
+        "crypto_name": "Ethereum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+        "crypto_name": "NEM",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/873.png"
+        },
+        {
+        "crypto_name": "Factom",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1087.png"
+        },
+        {
+        "crypto_name": "HyperSpace",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1125.png"
+        },
+        {
+        "crypto_name": "Emercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "FedoraCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/87.png"
+        },
+        {
+        "crypto_name": "Steem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1230.png"
+        },
+        {
+        "crypto_name": "Augur",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1104.png"
+        },
+        {
+        "crypto_name": "Golem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1455.png"
+        },
+        {
+        "crypto_name": "Zcash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1437.png"
+        },
+        {
+        "crypto_name": "PIVX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1169.png"
+        },
+        {
+        "crypto_name": "Decred",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1168.png"
+        },
+        {
+        "crypto_name": "Stratis",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1343.png"
+        },
+        {
+        "crypto_name": "SingularDTV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1409.png"
+        },
+        {
+        "crypto_name": "Lisk",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1214.png"
+        },
+        {
+        "crypto_name": "EOS",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+        "crypto_name": "Cardano",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+        "crypto_name": "Neo",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+        "crypto_name": "TRON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1958.png"
+        },
+        {
+        "crypto_name": "IOTA",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1720.png"
+        },
+        {
+        "crypto_name": "Tether",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png"
+        },
+        {
+        "crypto_name": "VeChain",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3077.png"
+        },
+        {
+        "crypto_name": "Qtum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1684.png"
+        },
+        {
+        "crypto_name": "OMG Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1808.png"
+        },
+        {
+        "crypto_name": "ICON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2099.png"
+        },
+        {
+        "crypto_name": "Ethereum Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+        "crypto_name": "Bitcoin Cash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1831.png"
+        },
+        {
+        "crypto_name": "Bitcoin SV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3602.png"
+        },
+        {
+        "crypto_name": "Cosmos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3794.png"
+        },
+        {
+        "crypto_name": "Ontology",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2566.png"
+        },
+        {
+        "crypto_name": "TAGZ5",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4981.png"
+        },
+        {
+        "crypto_name": "Tezos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2011.png"
+        },
+        {
+        "crypto_name": "Chainlink",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+        "crypto_name": "UNUS SED LEO",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3957.png"
+        },
+        {
+        "crypto_name": "Cronos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3635.png"
+        },
+        {
+        "crypto_name": "Huobi Token",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "Storeum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4162.png"
+        },
+        {
+        "crypto_name": "BNB",
+        "market_cap": 0,
+        "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+        "crypto_name": "Uniswap",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7083.png"
+        },
+        {
+        "crypto_name": "USD Coin",
+        "market_cap": 0,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/5a8229787b5e4c809b5914eef709b59a.png"
+        },
+        {
+        "crypto_name": "Filecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2280.png"
+        },
+        {
+        "crypto_name": "Theta Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2416.png"
+        },
+        {
+        "crypto_name": "Wrapped Bitcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3717.png"
+        },
+        {
+        "crypto_name": "Solana",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png"
+        },
+        {
+        "crypto_name": "Terra Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4172.png"
+        },
+        {
+        "crypto_name": "TerraClassicUSD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7129.png"
+        },
+        {
+        "crypto_name": "Binance USD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png"
+        },
+        {
+        "crypto_name": "Avalanche",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        },
+        {
+        "crypto_name": "Polkadot",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6636.png"
+        },
+        {
+        "crypto_name": "Shiba Inu",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png"
+        },
+        {
+        "crypto_name": "Lido Staked ETH",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8085.png"
+        },
+        {
+        "crypto_name": "Dai",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png"
+        },
+        {
+        "crypto_name": "Polygon",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3890.png"
+        },
+        {
+        "crypto_name": "HEX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5015.png"
+        },
+        {
+        "crypto_name": "Wrapped TRON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/18579.png"
+        },
+    ],
+    "2014": [
+    {
+        "crypto_name": "Bitcoin",
+        "color": "#F7931A",
+        "market_cap": 5690810165,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/6fbea0356edd48a4a68a4b877195443c.png"
+        },
+        {
+        "crypto_name": "Litecoin",
+        "market_cap": 304767508,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2.png"
+        },
+        {
+        "crypto_name": "Namecoin",
+        "market_cap": 18625432,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3.png"
+        },
+        {
+        "crypto_name": "Peercoin",
+        "market_cap": 46648015,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5.png"
+        },
+        {
+        "crypto_name": "Terracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4.png"
+        },
+        {
+        "crypto_name": "Devcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7.png"
+        },
+        {
+        "crypto_name": "Novacoin",
+        "market_cap": 2429836,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6.png"
+        },
+        {
+        "crypto_name": "XRP",
+        "market_cap": 41935004,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/52.png"
+        },
+        {
+        "crypto_name": "Dogecoin",
+        "market_cap": 37748840,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png"
+        },
+        {
+        "crypto_name": "Omni",
+        "market_cap": 22665771,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/83.png"
+        },
+        {
+        "crypto_name": "Nxt",
+        "market_cap": 21998037,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/66.png"
+        },
+        {
+        "crypto_name": "BlackCoin",
+        "market_cap": 9170955,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/170.png"
+        },
+        {
+        "crypto_name": "MaidSafeCoin",
+        "market_cap": 7180197,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/291.png"
+        },
+        {
+        "crypto_name": "Dash",
+        "market_cap": 6438676,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/131.png"
+        },
+        {
+        "crypto_name": "BitShares PTS",
+        "market_cap": 6004212,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/463.png"
+        },
+        {
+        "crypto_name": "Auroracoin",
+        "market_cap": 5970581,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/148.png"
+        },
+        {
+        "crypto_name": "Quark",
+        "market_cap": 4623815,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/53.png"
+        },
+        {
+        "crypto_name": "Zetacoin",
+        "market_cap": 4477081,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/56.png"
+        },
+        {
+        "crypto_name": "Primecoin",
+        "market_cap": 4219575,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/42.png"
+        },
+        {
+        "crypto_name": "Counterparty",
+        "market_cap": 3867498,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/132.png"
+        },
+        {
+        "crypto_name": "Feathercoin",
+        "market_cap": 3708688,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8.png"
+        },
+        {
+        "crypto_name": "Vertcoin",
+        "market_cap": 3470717,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/99.png"
+        },
+        {
+        "crypto_name": "Stellar",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+        "crypto_name": "Banx",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/642.png"
+        },
+        {
+        "crypto_name": "Bytecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/372.png"
+        },
+        {
+        "crypto_name": "Monero",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/328.png"
+        },
+        {
+        "crypto_name": "YbCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/95.png"
+        },
+        {
+        "crypto_name": "NuShares",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/699.png"
+        },
+        {
+        "crypto_name": "PayCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/764.png"
+        },
+        {
+        "crypto_name": "MonaCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/213.png"
+        },
+        {
+        "crypto_name": "SuperNET",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/612.png"
+        },
+        {
+        "crypto_name": "Ethereum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+        "crypto_name": "NEM",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/873.png"
+        },
+        {
+        "crypto_name": "Factom",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1087.png"
+        },
+        {
+        "crypto_name": "HyperSpace",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1125.png"
+        },
+        {
+        "crypto_name": "Emercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "FedoraCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/87.png"
+        },
+        {
+        "crypto_name": "Steem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1230.png"
+        },
+        {
+        "crypto_name": "Augur",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1104.png"
+        },
+        {
+        "crypto_name": "Golem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1455.png"
+        },
+        {
+        "crypto_name": "Zcash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1437.png"
+        },
+        {
+        "crypto_name": "PIVX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1169.png"
+        },
+        {
+        "crypto_name": "Decred",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1168.png"
+        },
+        {
+        "crypto_name": "Stratis",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1343.png"
+        },
+        {
+        "crypto_name": "SingularDTV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1409.png"
+        },
+        {
+        "crypto_name": "Lisk",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1214.png"
+        },
+        {
+        "crypto_name": "EOS",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+        "crypto_name": "Cardano",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+        "crypto_name": "Neo",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+        "crypto_name": "TRON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1958.png"
+        },
+        {
+        "crypto_name": "IOTA",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1720.png"
+        },
+        {
+        "crypto_name": "Tether",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png"
+        },
+        {
+        "crypto_name": "VeChain",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3077.png"
+        },
+        {
+        "crypto_name": "Qtum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1684.png"
+        },
+        {
+        "crypto_name": "OMG Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1808.png"
+        },
+        {
+        "crypto_name": "ICON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2099.png"
+        },
+        {
+        "crypto_name": "Ethereum Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+        "crypto_name": "Bitcoin Cash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1831.png"
+        },
+        {
+        "crypto_name": "Bitcoin SV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3602.png"
+        },
+        {
+        "crypto_name": "Cosmos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3794.png"
+        },
+        {
+        "crypto_name": "Ontology",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2566.png"
+        },
+        {
+        "crypto_name": "TAGZ5",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4981.png"
+        },
+        {
+        "crypto_name": "Tezos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2011.png"
+        },
+        {
+        "crypto_name": "Chainlink",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+        "crypto_name": "UNUS SED LEO",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3957.png"
+        },
+        {
+        "crypto_name": "Cronos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3635.png"
+        },
+        {
+        "crypto_name": "Huobi Token",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "Storeum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4162.png"
+        },
+        {
+        "crypto_name": "BNB",
+        "market_cap": 0,
+        "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+        "crypto_name": "Uniswap",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7083.png"
+        },
+        {
+        "crypto_name": "USD Coin",
+        "market_cap": 0,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/5a8229787b5e4c809b5914eef709b59a.png"
+        },
+        {
+        "crypto_name": "Filecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2280.png"
+        },
+        {
+        "crypto_name": "Theta Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2416.png"
+        },
+        {
+        "crypto_name": "Wrapped Bitcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3717.png"
+        },
+        {
+        "crypto_name": "Solana",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png"
+        },
+        {
+        "crypto_name": "Terra Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4172.png"
+        },
+        {
+        "crypto_name": "TerraClassicUSD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7129.png"
+        },
+        {
+        "crypto_name": "Binance USD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png"
+        },
+        {
+        "crypto_name": "Avalanche",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        },
+        {
+        "crypto_name": "Polkadot",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6636.png"
+        },
+        {
+        "crypto_name": "Shiba Inu",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png"
+        },
+        {
+        "crypto_name": "Lido Staked ETH",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8085.png"
+        },
+        {
+        "crypto_name": "Dai",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png"
+        },
+        {
+        "crypto_name": "Polygon",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3890.png"
+        },
+        {
+        "crypto_name": "HEX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5015.png"
+        },
+        {
+        "crypto_name": "Wrapped TRON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/18579.png"
+        },
+    ],
+    "2015": [
+        {
+        "crypto_name": "Bitcoin",
+        "color": "#F7931A",
+        "market_cap": 3332094504,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/6fbea0356edd48a4a68a4b877195443c.png"
+        },
+        {
+        "crypto_name": "Litecoin",
+        "market_cap": 55615194,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2.png"
+        },
+        {
+        "crypto_name": "Namecoin",
+        "market_cap": 3830173,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3.png"
+        },
+        {
+        "crypto_name": "Peercoin",
+        "market_cap": 5145136,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5.png"
+        },
+        {
+        "crypto_name": "Terracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4.png"
+        },
+        {
+        "crypto_name": "Devcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7.png"
+        },
+        {
+        "crypto_name": "Novacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6.png"
+        },
+        {
+        "crypto_name": "XRP",
+        "market_cap": 256197590,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/52.png"
+        },
+        {
+        "crypto_name": "Dogecoin",
+        "market_cap": 10266864,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png"
+        },
+        {
+        "crypto_name": "Omni",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/83.png"
+        },
+        {
+        "crypto_name": "Nxt",
+        "market_cap": 9392713,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/66.png"
+        },
+        {
+        "crypto_name": "BlackCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/170.png"
+        },
+        {
+        "crypto_name": "MaidSafeCoin",
+        "market_cap": 10410561,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/291.png"
+        },
+        {
+        "crypto_name": "Dash",
+        "market_cap": 15835492,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/131.png"
+        },
+        {
+        "crypto_name": "BitShares PTS",
+        "market_cap": 8808720,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/463.png"
+        },
+        {
+        "crypto_name": "Auroracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/148.png"
+        },
+        {
+        "crypto_name": "Quark",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/53.png"
+        },
+        {
+        "crypto_name": "Zetacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/56.png"
+        },
+        {
+        "crypto_name": "Primecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/42.png"
+        },
+        {
+        "crypto_name": "Counterparty",
+        "market_cap": 2598113,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/132.png"
+        },
+        {
+        "crypto_name": "Feathercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8.png"
+        },
+        {
+        "crypto_name": "Vertcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/99.png"
+        },
+        {
+        "crypto_name": "Stellar",
+        "market_cap": 13191438,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+        "crypto_name": "Banx",
+        "market_cap": 7325270,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/642.png"
+        },
+        {
+        "crypto_name": "Bytecoin",
+        "market_cap": 4582182,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/372.png"
+        },
+        {
+        "crypto_name": "Monero",
+        "market_cap": 3721181,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/328.png"
+        },
+        {
+        "crypto_name": "YbCoin",
+        "market_cap": 2922786,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/95.png"
+        },
+        {
+        "crypto_name": "NuShares",
+        "market_cap": 2036027,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/699.png"
+        },
+        {
+        "crypto_name": "PayCoin",
+        "market_cap": 2039712,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/764.png"
+        },
+        {
+        "crypto_name": "MonaCoin",
+        "market_cap": 1788322,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/213.png"
+        },
+        {
+        "crypto_name": "SuperNET",
+        "market_cap": 1696860,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/612.png"
+        },
+        {
+        "crypto_name": "Ethereum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+        "crypto_name": "NEM",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/873.png"
+        },
+        {
+        "crypto_name": "Factom",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1087.png"
+        },
+        {
+        "crypto_name": "HyperSpace",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1125.png"
+        },
+        {
+        "crypto_name": "Emercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "FedoraCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/87.png"
+        },
+        {
+        "crypto_name": "Steem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1230.png"
+        },
+        {
+        "crypto_name": "Augur",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1104.png"
+        },
+        {
+        "crypto_name": "Golem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1455.png"
+        },
+        {
+        "crypto_name": "Zcash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1437.png"
+        },
+        {
+        "crypto_name": "PIVX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1169.png"
+        },
+        {
+        "crypto_name": "Decred",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1168.png"
+        },
+        {
+        "crypto_name": "Stratis",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1343.png"
+        },
+        {
+        "crypto_name": "SingularDTV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1409.png"
+        },
+        {
+        "crypto_name": "Lisk",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1214.png"
+        },
+        {
+        "crypto_name": "EOS",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+        "crypto_name": "Cardano",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+        "crypto_name": "Neo",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+        "crypto_name": "TRON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1958.png"
+        },
+        {
+        "crypto_name": "IOTA",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1720.png"
+        },
+        {
+        "crypto_name": "Tether",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png"
+        },
+        {
+        "crypto_name": "VeChain",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3077.png"
+        },
+        {
+        "crypto_name": "Qtum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1684.png"
+        },
+        {
+        "crypto_name": "OMG Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1808.png"
+        },
+        {
+        "crypto_name": "ICON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2099.png"
+        },
+        {
+        "crypto_name": "Ethereum Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+        "crypto_name": "Bitcoin Cash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1831.png"
+        },
+        {
+        "crypto_name": "Bitcoin SV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3602.png"
+        },
+        {
+        "crypto_name": "Cosmos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3794.png"
+        },
+        {
+        "crypto_name": "Ontology",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2566.png"
+        },
+        {
+        "crypto_name": "TAGZ5",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4981.png"
+        },
+        {
+        "crypto_name": "Tezos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2011.png"
+        },
+        {
+        "crypto_name": "Chainlink",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+        "crypto_name": "UNUS SED LEO",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3957.png"
+        },
+        {
+        "crypto_name": "Cronos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3635.png"
+        },
+        {
+        "crypto_name": "Huobi Token",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "Storeum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4162.png"
+        },
+        {
+        "crypto_name": "BNB",
+        "market_cap": 0,
+        "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+        "crypto_name": "Uniswap",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7083.png"
+        },
+        {
+        "crypto_name": "USD Coin",
+        "market_cap": 0,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/5a8229787b5e4c809b5914eef709b59a.png"
+        },
+        {
+        "crypto_name": "Filecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2280.png"
+        },
+        {
+        "crypto_name": "Theta Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2416.png"
+        },
+        {
+        "crypto_name": "Wrapped Bitcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3717.png"
+        },
+        {
+        "crypto_name": "Solana",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png"
+        },
+        {
+        "crypto_name": "Terra Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4172.png"
+        },
+        {
+        "crypto_name": "TerraClassicUSD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7129.png"
+        },
+        {
+        "crypto_name": "Binance USD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png"
+        },
+        {
+        "crypto_name": "Avalanche",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        },
+        {
+        "crypto_name": "Polkadot",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6636.png"
+        },
+        {
+        "crypto_name": "Shiba Inu",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png"
+        },
+        {
+        "crypto_name": "Lido Staked ETH",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8085.png"
+        },
+        {
+        "crypto_name": "Dai",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png"
+        },
+        {
+        "crypto_name": "Polygon",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3890.png"
+        },
+        {
+        "crypto_name": "HEX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5015.png"
+        },
+        {
+        "crypto_name": "Wrapped TRON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/18579.png"
+        },
+    ],
+    "2016": [
+    {
+        "crypto_name": "Bitcoin",
+        "color": "#F7931A",
+        "market_cap": 6944860514,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/6fbea0356edd48a4a68a4b877195443c.png"
+        },
+        {
+        "crypto_name": "Litecoin",
+        "market_cap": 166838034,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2.png"
+        },
+        {
+        "crypto_name": "Namecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3.png"
+        },
+        {
+        "crypto_name": "Peercoin",
+        "market_cap": 10005403,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5.png"
+        },
+        {
+        "crypto_name": "Terracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4.png"
+        },
+        {
+        "crypto_name": "Devcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7.png"
+        },
+        {
+        "crypto_name": "Novacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6.png"
+        },
+        {
+        "crypto_name": "XRP",
+        "market_cap": 237520563,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/52.png"
+        },
+        {
+        "crypto_name": "Dogecoin",
+        "market_cap": 23484893,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png"
+        },
+        {
+        "crypto_name": "Omni",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/83.png"
+        },
+        {
+        "crypto_name": "Nxt",
+        "market_cap": 6998590,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/66.png"
+        },
+        {
+        "crypto_name": "BlackCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/170.png"
+        },
+        {
+        "crypto_name": "MaidSafeCoin",
+        "market_cap": 25349271,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/291.png"
+        },
+        {
+        "crypto_name": "Dash",
+        "market_cap": 43802123,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/131.png"
+        },
+        {
+        "crypto_name": "BitShares PTS",
+        "market_cap": 10157112,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/463.png"
+        },
+        {
+        "crypto_name": "Auroracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/148.png"
+        },
+        {
+        "crypto_name": "Quark",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/53.png"
+        },
+        {
+        "crypto_name": "Zetacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/56.png"
+        },
+        {
+        "crypto_name": "Primecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/42.png"
+        },
+        {
+        "crypto_name": "Counterparty",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/132.png"
+        },
+        {
+        "crypto_name": "Feathercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8.png"
+        },
+        {
+        "crypto_name": "Vertcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/99.png"
+        },
+        {
+        "crypto_name": "Stellar",
+        "market_cap": 10157888,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+        "crypto_name": "Banx",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/642.png"
+        },
+        {
+        "crypto_name": "Bytecoin",
+        "market_cap": 6461709,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/372.png"
+        },
+        {
+        "crypto_name": "Monero",
+        "market_cap": 10767277,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/328.png"
+        },
+        {
+        "crypto_name": "YbCoin",
+        "market_cap": 7797730,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/95.png"
+        },
+        {
+        "crypto_name": "NuShares",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/699.png"
+        },
+        {
+        "crypto_name": "PayCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/764.png"
+        },
+        {
+        "crypto_name": "MonaCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/213.png"
+        },
+        {
+        "crypto_name": "SuperNET",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/612.png"
+        },
+        {
+        "crypto_name": "Ethereum",
+        "market_cap": 701473017,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+        "crypto_name": "NEM",
+        "market_cap": 14410440,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/873.png"
+        },
+        {
+        "crypto_name": "Factom",
+        "market_cap": 9971317,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1087.png"
+        },
+        {
+        "crypto_name": "HyperSpace",
+        "market_cap": 8572484,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1125.png"
+        },
+        {
+        "crypto_name": "Emercoin",
+        "market_cap": 7212067,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "FedoraCoin",
+        "market_cap": 7100069,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/87.png"
+        },
+        {
+        "crypto_name": "Steem",
+        "market_cap": 6733536,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1230.png"
+        },
+        {
+        "crypto_name": "Augur",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1104.png"
+        },
+        {
+        "crypto_name": "Golem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1455.png"
+        },
+        {
+        "crypto_name": "Zcash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1437.png"
+        },
+        {
+        "crypto_name": "PIVX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1169.png"
+        },
+        {
+        "crypto_name": "Decred",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1168.png"
+        },
+        {
+        "crypto_name": "Stratis",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1343.png"
+        },
+        {
+        "crypto_name": "SingularDTV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1409.png"
+        },
+        {
+        "crypto_name": "Lisk",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1214.png"
+        },
+        {
+        "crypto_name": "EOS",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+        "crypto_name": "Cardano",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+        "crypto_name": "Neo",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+        "crypto_name": "TRON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1958.png"
+        },
+        {
+        "crypto_name": "IOTA",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1720.png"
+        },
+        {
+        "crypto_name": "Tether",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png"
+        },
+        {
+        "crypto_name": "VeChain",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3077.png"
+        },
+        {
+        "crypto_name": "Qtum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1684.png"
+        },
+        {
+        "crypto_name": "OMG Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1808.png"
+        },
+        {
+        "crypto_name": "ICON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2099.png"
+        },
+        {
+        "crypto_name": "Ethereum Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+        "crypto_name": "Bitcoin Cash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1831.png"
+        },
+        {
+        "crypto_name": "Bitcoin SV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3602.png"
+        },
+        {
+        "crypto_name": "Cosmos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3794.png"
+        },
+        {
+        "crypto_name": "Ontology",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2566.png"
+        },
+        {
+        "crypto_name": "TAGZ5",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4981.png"
+        },
+        {
+        "crypto_name": "Tezos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2011.png"
+        },
+        {
+        "crypto_name": "Chainlink",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+        "crypto_name": "UNUS SED LEO",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3957.png"
+        },
+        {
+        "crypto_name": "Cronos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3635.png"
+        },
+        {
+        "crypto_name": "Huobi Token",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "Storeum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4162.png"
+        },
+        {
+        "crypto_name": "BNB",
+        "market_cap": 0,
+        "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+        "crypto_name": "Uniswap",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7083.png"
+        },
+        {
+        "crypto_name": "USD Coin",
+        "market_cap": 0,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/5a8229787b5e4c809b5914eef709b59a.png"
+        },
+        {
+        "crypto_name": "Filecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2280.png"
+        },
+        {
+        "crypto_name": "Theta Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2416.png"
+        },
+        {
+        "crypto_name": "Wrapped Bitcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3717.png"
+        },
+        {
+        "crypto_name": "Solana",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png"
+        },
+        {
+        "crypto_name": "Terra Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4172.png"
+        },
+        {
+        "crypto_name": "TerraClassicUSD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7129.png"
+        },
+        {
+        "crypto_name": "Binance USD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png"
+        },
+        {
+        "crypto_name": "Avalanche",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        },
+        {
+        "crypto_name": "Polkadot",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6636.png"
+        },
+        {
+        "crypto_name": "Shiba Inu",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png"
+        },
+        {
+        "crypto_name": "Lido Staked ETH",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8085.png"
+        },
+        {
+        "crypto_name": "Dai",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png"
+        },
+        {
+        "crypto_name": "Polygon",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3890.png"
+        },
+        {
+        "crypto_name": "HEX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5015.png"
+        },
+        {
+        "crypto_name": "Wrapped TRON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/18579.png"
+        },
+    ],
+    "2017": [
+    {
+        "crypto_name": "Bitcoin",
+        "color": "#F7931A",
+        "market_cap": 21975104909,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/6fbea0356edd48a4a68a4b877195443c.png"
+        },
+        {
+        "crypto_name": "Litecoin",
+        "market_cap": 799087301,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2.png"
+        },
+        {
+        "crypto_name": "Namecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3.png"
+        },
+        {
+        "crypto_name": "Peercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5.png"
+        },
+        {
+        "crypto_name": "Terracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4.png"
+        },
+        {
+        "crypto_name": "Devcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7.png"
+        },
+        {
+        "crypto_name": "Novacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6.png"
+        },
+        {
+        "crypto_name": "XRP",
+        "market_cap": 1955141293,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/52.png"
+        },
+        {
+        "crypto_name": "Dogecoin",
+        "market_cap": 81479217,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png"
+        },
+        {
+        "crypto_name": "Omni",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/83.png"
+        },
+        {
+        "crypto_name": "Nxt",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/66.png"
+        },
+        {
+        "crypto_name": "BlackCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/170.png"
+        },
+        {
+        "crypto_name": "MaidSafeCoin",
+        "market_cap": 114767744,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/291.png"
+        },
+        {
+        "crypto_name": "Dash",
+        "market_cap": 664882851,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/131.png"
+        },
+        {
+        "crypto_name": "BitShares PTS",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/463.png"
+        },
+        {
+        "crypto_name": "Auroracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/148.png"
+        },
+        {
+        "crypto_name": "Quark",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/53.png"
+        },
+        {
+        "crypto_name": "Zetacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/56.png"
+        },
+        {
+        "crypto_name": "Primecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/42.png"
+        },
+        {
+        "crypto_name": "Counterparty",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/132.png"
+        },
+        {
+        "crypto_name": "Feathercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8.png"
+        },
+        {
+        "crypto_name": "Vertcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/99.png"
+        },
+        {
+        "crypto_name": "Stellar",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+        "crypto_name": "Banx",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/642.png"
+        },
+        {
+        "crypto_name": "Bytecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/372.png"
+        },
+        {
+        "crypto_name": "Monero",
+        "market_cap": 341260182,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/328.png"
+        },
+        {
+        "crypto_name": "YbCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/95.png"
+        },
+        {
+        "crypto_name": "NuShares",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/699.png"
+        },
+        {
+        "crypto_name": "PayCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/764.png"
+        },
+        {
+        "crypto_name": "MonaCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/213.png"
+        },
+        {
+        "crypto_name": "SuperNET",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/612.png"
+        },
+        {
+        "crypto_name": "Ethereum",
+        "market_cap": 7206669917,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+        "crypto_name": "NEM",
+        "market_cap": 458693100,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/873.png"
+        },
+        {
+        "crypto_name": "Factom",
+        "market_cap": 70755420,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1087.png"
+        },
+        {
+        "crypto_name": "HyperSpace",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1125.png"
+        },
+        {
+        "crypto_name": "Emercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "FedoraCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/87.png"
+        },
+        {
+        "crypto_name": "Steem",
+        "market_cap": 65374709,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1230.png"
+        },
+        {
+        "crypto_name": "Augur",
+        "market_cap": 184619600,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1104.png"
+        },
+        {
+        "crypto_name": "Golem",
+        "market_cap": 180337680,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1455.png"
+        },
+        {
+        "crypto_name": "Zcash",
+        "market_cap": 112048508,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1437.png"
+        },
+        {
+        "crypto_name": "PIVX",
+        "market_cap": 89735944,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1169.png"
+        },
+        {
+        "crypto_name": "Decred",
+        "market_cap": 75931587,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1168.png"
+        },
+        {
+        "crypto_name": "Stratis",
+        "market_cap": 72057132,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1343.png"
+        },
+        {
+        "crypto_name": "SingularDTV",
+        "market_cap": 66733200,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1409.png"
+        },
+        {
+        "crypto_name": "Lisk",
+        "market_cap": 62600551,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1214.png"
+        },
+        {
+        "crypto_name": "EOS",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+        "crypto_name": "Cardano",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+        "crypto_name": "Neo",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+        "crypto_name": "TRON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1958.png"
+        },
+        {
+        "crypto_name": "IOTA",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1720.png"
+        },
+        {
+        "crypto_name": "Tether",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png"
+        },
+        {
+        "crypto_name": "VeChain",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3077.png"
+        },
+        {
+        "crypto_name": "Qtum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1684.png"
+        },
+        {
+        "crypto_name": "OMG Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1808.png"
+        },
+        {
+        "crypto_name": "ICON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2099.png"
+        },
+        {
+        "crypto_name": "Ethereum Classic",
+        "market_cap": 594207939,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+        "crypto_name": "Bitcoin Cash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1831.png"
+        },
+        {
+        "crypto_name": "Bitcoin SV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3602.png"
+        },
+        {
+        "crypto_name": "Cosmos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3794.png"
+        },
+        {
+        "crypto_name": "Ontology",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2566.png"
+        },
+        {
+        "crypto_name": "TAGZ5",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4981.png"
+        },
+        {
+        "crypto_name": "Tezos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2011.png"
+        },
+        {
+        "crypto_name": "Chainlink",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+        "crypto_name": "UNUS SED LEO",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3957.png"
+        },
+        {
+        "crypto_name": "Cronos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3635.png"
+        },
+        {
+        "crypto_name": "Huobi Token",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "Storeum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4162.png"
+        },
+        {
+        "crypto_name": "BNB",
+        "market_cap": 0,
+        "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+        "crypto_name": "Uniswap",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7083.png"
+        },
+        {
+        "crypto_name": "USD Coin",
+        "market_cap": 0,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/5a8229787b5e4c809b5914eef709b59a.png"
+        },
+        {
+        "crypto_name": "Filecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2280.png"
+        },
+        {
+        "crypto_name": "Theta Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2416.png"
+        },
+        {
+        "crypto_name": "Wrapped Bitcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3717.png"
+        },
+        {
+        "crypto_name": "Solana",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png"
+        },
+        {
+        "crypto_name": "Terra Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4172.png"
+        },
+        {
+        "crypto_name": "TerraClassicUSD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7129.png"
+        },
+        {
+        "crypto_name": "Binance USD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png"
+        },
+        {
+        "crypto_name": "Avalanche",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        },
+        {
+        "crypto_name": "Polkadot",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6636.png"
+        },
+        {
+        "crypto_name": "Shiba Inu",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png"
+        },
+        {
+        "crypto_name": "Lido Staked ETH",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8085.png"
+        },
+        {
+        "crypto_name": "Dai",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png"
+        },
+        {
+        "crypto_name": "Polygon",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3890.png"
+        },
+        {
+        "crypto_name": "HEX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5015.png"
+        },
+        {
+        "crypto_name": "Wrapped TRON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/18579.png"
+        },
+    ],
+    "2018": [
+    {
+        "crypto_name": "Bitcoin",
+        "color": "#F7931A",
+        "market_cap": 157163847314,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/6fbea0356edd48a4a68a4b877195443c.png"
+        },
+        {
+        "crypto_name": "Litecoin",
+        "market_cap": 8363095109,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2.png"
+        },
+        {
+        "crypto_name": "Namecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3.png"
+        },
+        {
+        "crypto_name": "Peercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5.png"
+        },
+        {
+        "crypto_name": "Terracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4.png"
+        },
+        {
+        "crypto_name": "Devcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7.png"
+        },
+        {
+        "crypto_name": "Novacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6.png"
+        },
+        {
+        "crypto_name": "XRP",
+        "market_cap": 32802091383,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/52.png"
+        },
+        {
+        "crypto_name": "Dogecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png"
+        },
+        {
+        "crypto_name": "Omni",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/83.png"
+        },
+        {
+        "crypto_name": "Nxt",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/66.png"
+        },
+        {
+        "crypto_name": "BlackCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/170.png"
+        },
+        {
+        "crypto_name": "MaidSafeCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/291.png"
+        },
+        {
+        "crypto_name": "Dash",
+        "market_cap": 3800869265,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/131.png"
+        },
+        {
+        "crypto_name": "BitShares PTS",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/463.png"
+        },
+        {
+        "crypto_name": "Auroracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/148.png"
+        },
+        {
+        "crypto_name": "Quark",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/53.png"
+        },
+        {
+        "crypto_name": "Zetacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/56.png"
+        },
+        {
+        "crypto_name": "Primecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/42.png"
+        },
+        {
+        "crypto_name": "Counterparty",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/132.png"
+        },
+        {
+        "crypto_name": "Feathercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8.png"
+        },
+        {
+        "crypto_name": "Vertcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/99.png"
+        },
+        {
+        "crypto_name": "Stellar",
+        "market_cap": 7886506767,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+        "crypto_name": "Banx",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/642.png"
+        },
+        {
+        "crypto_name": "Bytecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/372.png"
+        },
+        {
+        "crypto_name": "Monero",
+        "market_cap": 3875582215,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/328.png"
+        },
+        {
+        "crypto_name": "YbCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/95.png"
+        },
+        {
+        "crypto_name": "NuShares",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/699.png"
+        },
+        {
+        "crypto_name": "PayCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/764.png"
+        },
+        {
+        "crypto_name": "MonaCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/213.png"
+        },
+        {
+        "crypto_name": "SuperNET",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/612.png"
+        },
+        {
+        "crypto_name": "Ethereum",
+        "market_cap": 66423712256,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+        "crypto_name": "NEM",
+        "market_cap": 3679920000,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/873.png"
+        },
+        {
+        "crypto_name": "Factom",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1087.png"
+        },
+        {
+        "crypto_name": "HyperSpace",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1125.png"
+        },
+        {
+        "crypto_name": "Emercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "FedoraCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/87.png"
+        },
+        {
+        "crypto_name": "Steem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1230.png"
+        },
+        {
+        "crypto_name": "Augur",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1104.png"
+        },
+        {
+        "crypto_name": "Golem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1455.png"
+        },
+        {
+        "crypto_name": "Zcash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1437.png"
+        },
+        {
+        "crypto_name": "PIVX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1169.png"
+        },
+        {
+        "crypto_name": "Decred",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1168.png"
+        },
+        {
+        "crypto_name": "Stratis",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1343.png"
+        },
+        {
+        "crypto_name": "SingularDTV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1409.png"
+        },
+        {
+        "crypto_name": "Lisk",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1214.png"
+        },
+        {
+        "crypto_name": "EOS",
+        "market_cap": 14536328263,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+        "crypto_name": "Cardano",
+        "market_cap": 8901230003,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+        "crypto_name": "Neo",
+        "market_cap": 5477712500,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+        "crypto_name": "TRON",
+        "market_cap": 6165640941,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1958.png"
+        },
+        {
+        "crypto_name": "IOTA",
+        "market_cap": 5460053697,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1720.png"
+        },
+        {
+        "crypto_name": "Tether",
+        "market_cap": 2414527884,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png"
+        },
+        {
+        "crypto_name": "VeChain",
+        "market_cap": 2361563286,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3077.png"
+        },
+        {
+        "crypto_name": "Qtum",
+        "market_cap": 2004861847,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1684.png"
+        },
+        {
+        "crypto_name": "OMG Network",
+        "market_cap": 1729886563,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1808.png"
+        },
+        {
+        "crypto_name": "ICON",
+        "market_cap": 1680440777,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2099.png"
+        },
+        {
+        "crypto_name": "Ethereum Classic",
+        "market_cap": 2199403283,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+        "crypto_name": "Bitcoin Cash",
+        "market_cap": 23089803896,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1831.png"
+        },
+        {
+        "crypto_name": "Bitcoin SV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3602.png"
+        },
+        {
+        "crypto_name": "Cosmos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3794.png"
+        },
+        {
+        "crypto_name": "Ontology",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2566.png"
+        },
+        {
+        "crypto_name": "TAGZ5",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4981.png"
+        },
+        {
+        "crypto_name": "Tezos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2011.png"
+        },
+        {
+        "crypto_name": "Chainlink",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+        "crypto_name": "UNUS SED LEO",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3957.png"
+        },
+        {
+        "crypto_name": "Cronos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3635.png"
+        },
+        {
+        "crypto_name": "Huobi Token",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "Storeum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4162.png"
+        },
+        {
+        "crypto_name": "BNB",
+        "market_cap": 0,
+        "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+        "crypto_name": "Uniswap",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7083.png"
+        },
+        {
+        "crypto_name": "USD Coin",
+        "market_cap": 0,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/5a8229787b5e4c809b5914eef709b59a.png"
+        },
+        {
+        "crypto_name": "Filecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2280.png"
+        },
+        {
+        "crypto_name": "Theta Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2416.png"
+        },
+        {
+        "crypto_name": "Wrapped Bitcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3717.png"
+        },
+        {
+        "crypto_name": "Solana",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png"
+        },
+        {
+        "crypto_name": "Terra Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4172.png"
+        },
+        {
+        "crypto_name": "TerraClassicUSD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7129.png"
+        },
+        {
+        "crypto_name": "Binance USD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png"
+        },
+        {
+        "crypto_name": "Avalanche",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        },
+        {
+        "crypto_name": "Polkadot",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6636.png"
+        },
+        {
+        "crypto_name": "Shiba Inu",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png"
+        },
+        {
+        "crypto_name": "Lido Staked ETH",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8085.png"
+        },
+        {
+        "crypto_name": "Dai",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png"
+        },
+        {
+        "crypto_name": "Polygon",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3890.png"
+        },
+        {
+        "crypto_name": "HEX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5015.png"
+        },
+        {
+        "crypto_name": "Wrapped TRON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/18579.png"
+        },
+    ],
+    "2019": [
+    {
+        "crypto_name": "Bitcoin",
+        "color": "#F7931A",
+        "market_cap": 94573826827,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/6fbea0356edd48a4a68a4b877195443c.png"
+        },
+        {
+        "crypto_name": "Litecoin",
+        "market_cap": 4573555691,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2.png"
+        },
+        {
+        "crypto_name": "Namecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3.png"
+        },
+        {
+        "crypto_name": "Peercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5.png"
+        },
+        {
+        "crypto_name": "Terracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4.png"
+        },
+        {
+        "crypto_name": "Devcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7.png"
+        },
+        {
+        "crypto_name": "Novacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6.png"
+        },
+        {
+        "crypto_name": "XRP",
+        "market_cap": 12999538690,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/52.png"
+        },
+        {
+        "crypto_name": "Dogecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png"
+        },
+        {
+        "crypto_name": "Omni",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/83.png"
+        },
+        {
+        "crypto_name": "Nxt",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/66.png"
+        },
+        {
+        "crypto_name": "BlackCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/170.png"
+        },
+        {
+        "crypto_name": "MaidSafeCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/291.png"
+        },
+        {
+        "crypto_name": "Dash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/131.png"
+        },
+        {
+        "crypto_name": "BitShares PTS",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/463.png"
+        },
+        {
+        "crypto_name": "Auroracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/148.png"
+        },
+        {
+        "crypto_name": "Quark",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/53.png"
+        },
+        {
+        "crypto_name": "Zetacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/56.png"
+        },
+        {
+        "crypto_name": "Primecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/42.png"
+        },
+        {
+        "crypto_name": "Counterparty",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/132.png"
+        },
+        {
+        "crypto_name": "Feathercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8.png"
+        },
+        {
+        "crypto_name": "Vertcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/99.png"
+        },
+        {
+        "crypto_name": "Stellar",
+        "market_cap": 1909390183,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+        "crypto_name": "Banx",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/642.png"
+        },
+        {
+        "crypto_name": "Bytecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/372.png"
+        },
+        {
+        "crypto_name": "Monero",
+        "market_cap": 1052677379,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/328.png"
+        },
+        {
+        "crypto_name": "YbCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/95.png"
+        },
+        {
+        "crypto_name": "NuShares",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/699.png"
+        },
+        {
+        "crypto_name": "PayCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/764.png"
+        },
+        {
+        "crypto_name": "MonaCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/213.png"
+        },
+        {
+        "crypto_name": "SuperNET",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/612.png"
+        },
+        {
+        "crypto_name": "Ethereum",
+        "market_cap": 17170110493,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+        "crypto_name": "NEM",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/873.png"
+        },
+        {
+        "crypto_name": "Factom",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1087.png"
+        },
+        {
+        "crypto_name": "HyperSpace",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1125.png"
+        },
+        {
+        "crypto_name": "Emercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "FedoraCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/87.png"
+        },
+        {
+        "crypto_name": "Steem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1230.png"
+        },
+        {
+        "crypto_name": "Augur",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1104.png"
+        },
+        {
+        "crypto_name": "Golem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1455.png"
+        },
+        {
+        "crypto_name": "Zcash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1437.png"
+        },
+        {
+        "crypto_name": "PIVX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1169.png"
+        },
+        {
+        "crypto_name": "Decred",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1168.png"
+        },
+        {
+        "crypto_name": "Stratis",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1343.png"
+        },
+        {
+        "crypto_name": "SingularDTV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1409.png"
+        },
+        {
+        "crypto_name": "Lisk",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1214.png"
+        },
+        {
+        "crypto_name": "EOS",
+        "market_cap": 4556334656,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+        "crypto_name": "Cardano",
+        "market_cap": 1823858101,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+        "crypto_name": "Neo",
+        "market_cap": 637069377,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+        "crypto_name": "TRON",
+        "market_cap": 1598452606,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1958.png"
+        },
+        {
+        "crypto_name": "IOTA",
+        "market_cap": 846930950,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1720.png"
+        },
+        {
+        "crypto_name": "Tether",
+        "market_cap": 2851502734,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png"
+        },
+        {
+        "crypto_name": "VeChain",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3077.png"
+        },
+        {
+        "crypto_name": "Qtum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1684.png"
+        },
+        {
+        "crypto_name": "OMG Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1808.png"
+        },
+        {
+        "crypto_name": "ICON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2099.png"
+        },
+        {
+        "crypto_name": "Ethereum Classic",
+        "market_cap": 649645521,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+        "crypto_name": "Bitcoin Cash",
+        "market_cap": 4754698560,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1831.png"
+        },
+        {
+        "crypto_name": "Bitcoin SV",
+        "market_cap": 962208644,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3602.png"
+        },
+        {
+        "crypto_name": "Cosmos",
+        "market_cap": 750753657,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3794.png"
+        },
+        {
+        "crypto_name": "Ontology",
+        "market_cap": 549869347,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2566.png"
+        },
+        {
+        "crypto_name": "TAGZ5",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4981.png"
+        },
+        {
+        "crypto_name": "Tezos",
+        "market_cap": 805480416,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2011.png"
+        },
+        {
+        "crypto_name": "Chainlink",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+        "crypto_name": "UNUS SED LEO",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3957.png"
+        },
+        {
+        "crypto_name": "Cronos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3635.png"
+        },
+        {
+        "crypto_name": "Huobi Token",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "Storeum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4162.png"
+        },
+        {
+        "crypto_name": "BNB",
+        "market_cap": 3123908034,
+        "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+        "crypto_name": "Uniswap",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7083.png"
+        },
+        {
+        "crypto_name": "USD Coin",
+        "market_cap": 0,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/5a8229787b5e4c809b5914eef709b59a.png"
+        },
+        {
+        "crypto_name": "Filecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2280.png"
+        },
+        {
+        "crypto_name": "Theta Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2416.png"
+        },
+        {
+        "crypto_name": "Wrapped Bitcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3717.png"
+        },
+        {
+        "crypto_name": "Solana",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png"
+        },
+        {
+        "crypto_name": "Terra Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4172.png"
+        },
+        {
+        "crypto_name": "TerraClassicUSD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7129.png"
+        },
+        {
+        "crypto_name": "Binance USD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png"
+        },
+        {
+        "crypto_name": "Avalanche",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        },
+        {
+        "crypto_name": "Polkadot",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6636.png"
+        },
+        {
+        "crypto_name": "Shiba Inu",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png"
+        },
+        {
+        "crypto_name": "Lido Staked ETH",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8085.png"
+        },
+        {
+        "crypto_name": "Dai",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png"
+        },
+        {
+        "crypto_name": "Polygon",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3890.png"
+        },
+        {
+        "crypto_name": "HEX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5015.png"
+        },
+        {
+        "crypto_name": "Wrapped TRON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/18579.png"
+        },
+    ],
+    "2020": [
+    {
+        "crypto_name": "Bitcoin",
+        "color": "#F7931A",
+        "market_cap": 158922133909,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/6fbea0356edd48a4a68a4b877195443c.png"
+        },
+        {
+        "crypto_name": "Litecoin",
+        "market_cap": 3019046193,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2.png"
+        },
+        {
+        "crypto_name": "Namecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3.png"
+        },
+        {
+        "crypto_name": "Peercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5.png"
+        },
+        {
+        "crypto_name": "Terracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4.png"
+        },
+        {
+        "crypto_name": "Devcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7.png"
+        },
+        {
+        "crypto_name": "Novacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6.png"
+        },
+        {
+        "crypto_name": "XRP",
+        "market_cap": 9385477916,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/52.png"
+        },
+        {
+        "crypto_name": "Dogecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png"
+        },
+        {
+        "crypto_name": "Omni",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/83.png"
+        },
+        {
+        "crypto_name": "Nxt",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/66.png"
+        },
+        {
+        "crypto_name": "BlackCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/170.png"
+        },
+        {
+        "crypto_name": "MaidSafeCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/291.png"
+        },
+        {
+        "crypto_name": "Dash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/131.png"
+        },
+        {
+        "crypto_name": "BitShares PTS",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/463.png"
+        },
+        {
+        "crypto_name": "Auroracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/148.png"
+        },
+        {
+        "crypto_name": "Quark",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/53.png"
+        },
+        {
+        "crypto_name": "Zetacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/56.png"
+        },
+        {
+        "crypto_name": "Primecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/42.png"
+        },
+        {
+        "crypto_name": "Counterparty",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/132.png"
+        },
+        {
+        "crypto_name": "Feathercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8.png"
+        },
+        {
+        "crypto_name": "Vertcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/99.png"
+        },
+        {
+        "crypto_name": "Stellar",
+        "market_cap": 1375477544,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+        "crypto_name": "Banx",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/642.png"
+        },
+        {
+        "crypto_name": "Bytecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/372.png"
+        },
+        {
+        "crypto_name": "Monero",
+        "market_cap": 1096083709,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/328.png"
+        },
+        {
+        "crypto_name": "YbCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/95.png"
+        },
+        {
+        "crypto_name": "NuShares",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/699.png"
+        },
+        {
+        "crypto_name": "PayCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/764.png"
+        },
+        {
+        "crypto_name": "MonaCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/213.png"
+        },
+        {
+        "crypto_name": "SuperNET",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/612.png"
+        },
+        {
+        "crypto_name": "Ethereum",
+        "market_cap": 22989647065,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+        "crypto_name": "NEM",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/873.png"
+        },
+        {
+        "crypto_name": "Factom",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1087.png"
+        },
+        {
+        "crypto_name": "HyperSpace",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1125.png"
+        },
+        {
+        "crypto_name": "Emercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "FedoraCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/87.png"
+        },
+        {
+        "crypto_name": "Steem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1230.png"
+        },
+        {
+        "crypto_name": "Augur",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1104.png"
+        },
+        {
+        "crypto_name": "Golem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1455.png"
+        },
+        {
+        "crypto_name": "Zcash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1437.png"
+        },
+        {
+        "crypto_name": "PIVX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1169.png"
+        },
+        {
+        "crypto_name": "Decred",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1168.png"
+        },
+        {
+        "crypto_name": "Stratis",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1343.png"
+        },
+        {
+        "crypto_name": "SingularDTV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1409.png"
+        },
+        {
+        "crypto_name": "Lisk",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1214.png"
+        },
+        {
+        "crypto_name": "EOS",
+        "market_cap": 2613048284,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+        "crypto_name": "Cardano",
+        "market_cap": 1240505150,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+        "crypto_name": "Neo",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+        "crypto_name": "TRON",
+        "market_cap": 1018736565,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1958.png"
+        },
+        {
+        "crypto_name": "IOTA",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1720.png"
+        },
+        {
+        "crypto_name": "Tether",
+        "market_cap": 6393551732,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png"
+        },
+        {
+        "crypto_name": "VeChain",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3077.png"
+        },
+        {
+        "crypto_name": "Qtum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1684.png"
+        },
+        {
+        "crypto_name": "OMG Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1808.png"
+        },
+        {
+        "crypto_name": "ICON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2099.png"
+        },
+        {
+        "crypto_name": "Ethereum Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+        "crypto_name": "Bitcoin Cash",
+        "market_cap": 4595776899,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1831.png"
+        },
+        {
+        "crypto_name": "Bitcoin SV",
+        "market_cap": 3831312984,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3602.png"
+        },
+        {
+        "crypto_name": "Cosmos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3794.png"
+        },
+        {
+        "crypto_name": "Ontology",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2566.png"
+        },
+        {
+        "crypto_name": "TAGZ5",
+        "market_cap": 2066342891,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4981.png"
+        },
+        {
+        "crypto_name": "Tezos",
+        "market_cap": 1957055600,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2011.png"
+        },
+        {
+        "crypto_name": "Chainlink",
+        "market_cap": 1302166857,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+        "crypto_name": "UNUS SED LEO",
+        "market_cap": 1067563432,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3957.png"
+        },
+        {
+        "crypto_name": "Cronos",
+        "market_cap": 959168422,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3635.png"
+        },
+        {
+        "crypto_name": "Huobi Token",
+        "market_cap": 937217848,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "Storeum",
+        "market_cap": 820463023,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4162.png"
+        },
+        {
+        "crypto_name": "BNB",
+        "market_cap": 2649408578,
+        "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+        "crypto_name": "Uniswap",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7083.png"
+        },
+        {
+        "crypto_name": "USD Coin",
+        "market_cap": 0,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/5a8229787b5e4c809b5914eef709b59a.png"
+        },
+        {
+        "crypto_name": "Filecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2280.png"
+        },
+        {
+        "crypto_name": "Theta Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2416.png"
+        },
+        {
+        "crypto_name": "Wrapped Bitcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3717.png"
+        },
+        {
+        "crypto_name": "Solana",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png"
+        },
+        {
+        "crypto_name": "Terra Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4172.png"
+        },
+        {
+        "crypto_name": "TerraClassicUSD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7129.png"
+        },
+        {
+        "crypto_name": "Binance USD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png"
+        },
+        {
+        "crypto_name": "Avalanche",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        },
+        {
+        "crypto_name": "Polkadot",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6636.png"
+        },
+        {
+        "crypto_name": "Shiba Inu",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png"
+        },
+        {
+        "crypto_name": "Lido Staked ETH",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8085.png"
+        },
+        {
+        "crypto_name": "Dai",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png"
+        },
+        {
+        "crypto_name": "Polygon",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3890.png"
+        },
+        {
+        "crypto_name": "HEX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5015.png"
+        },
+        {
+        "crypto_name": "Wrapped TRON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/18579.png"
+        },
+    ],
+    "2021": [
+    {
+        "crypto_name": "Bitcoin",
+        "color": "#F7931A",
+        "market_cap": 1079669884320,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/6fbea0356edd48a4a68a4b877195443c.png"
+        },
+        {
+        "crypto_name": "Litecoin",
+        "market_cap": 18101057211,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2.png"
+        },
+        {
+        "crypto_name": "Namecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3.png"
+        },
+        {
+        "crypto_name": "Peercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5.png"
+        },
+        {
+        "crypto_name": "Terracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4.png"
+        },
+        {
+        "crypto_name": "Devcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7.png"
+        },
+        {
+        "crypto_name": "Novacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6.png"
+        },
+        {
+        "crypto_name": "XRP",
+        "market_cap": 72268392381,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/52.png"
+        },
+        {
+        "crypto_name": "Dogecoin",
+        "market_cap": 43681559535,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png"
+        },
+        {
+        "crypto_name": "Omni",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/83.png"
+        },
+        {
+        "crypto_name": "Nxt",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/66.png"
+        },
+        {
+        "crypto_name": "BlackCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/170.png"
+        },
+        {
+        "crypto_name": "MaidSafeCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/291.png"
+        },
+        {
+        "crypto_name": "Dash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/131.png"
+        },
+        {
+        "crypto_name": "BitShares PTS",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/463.png"
+        },
+        {
+        "crypto_name": "Auroracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/148.png"
+        },
+        {
+        "crypto_name": "Quark",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/53.png"
+        },
+        {
+        "crypto_name": "Zetacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/56.png"
+        },
+        {
+        "crypto_name": "Primecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/42.png"
+        },
+        {
+        "crypto_name": "Counterparty",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/132.png"
+        },
+        {
+        "crypto_name": "Feathercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8.png"
+        },
+        {
+        "crypto_name": "Vertcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/99.png"
+        },
+        {
+        "crypto_name": "Stellar",
+        "market_cap": 12166391782,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+        "crypto_name": "Banx",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/642.png"
+        },
+        {
+        "crypto_name": "Bytecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/372.png"
+        },
+        {
+        "crypto_name": "Monero",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/328.png"
+        },
+        {
+        "crypto_name": "YbCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/95.png"
+        },
+        {
+        "crypto_name": "NuShares",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/699.png"
+        },
+        {
+        "crypto_name": "PayCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/764.png"
+        },
+        {
+        "crypto_name": "MonaCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/213.png"
+        },
+        {
+        "crypto_name": "SuperNET",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/612.png"
+        },
+        {
+        "crypto_name": "Ethereum",
+        "market_cap": 320822874721,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+        "crypto_name": "NEM",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/873.png"
+        },
+        {
+        "crypto_name": "Factom",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1087.png"
+        },
+        {
+        "crypto_name": "HyperSpace",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1125.png"
+        },
+        {
+        "crypto_name": "Emercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "FedoraCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/87.png"
+        },
+        {
+        "crypto_name": "Steem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1230.png"
+        },
+        {
+        "crypto_name": "Augur",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1104.png"
+        },
+        {
+        "crypto_name": "Golem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1455.png"
+        },
+        {
+        "crypto_name": "Zcash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1437.png"
+        },
+        {
+        "crypto_name": "PIVX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1169.png"
+        },
+        {
+        "crypto_name": "Decred",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1168.png"
+        },
+        {
+        "crypto_name": "Stratis",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1343.png"
+        },
+        {
+        "crypto_name": "SingularDTV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1409.png"
+        },
+        {
+        "crypto_name": "Lisk",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1214.png"
+        },
+        {
+        "crypto_name": "EOS",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+        "crypto_name": "Cardano",
+        "market_cap": 43208459367,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+        "crypto_name": "Neo",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+        "crypto_name": "TRON",
+        "market_cap": 9475486249,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1958.png"
+        },
+        {
+        "crypto_name": "IOTA",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1720.png"
+        },
+        {
+        "crypto_name": "Tether",
+        "market_cap": 50995492789,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png"
+        },
+        {
+        "crypto_name": "VeChain",
+        "market_cap": 12932497609,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3077.png"
+        },
+        {
+        "crypto_name": "Qtum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1684.png"
+        },
+        {
+        "crypto_name": "OMG Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1808.png"
+        },
+        {
+        "crypto_name": "ICON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2099.png"
+        },
+        {
+        "crypto_name": "Ethereum Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+        "crypto_name": "Bitcoin Cash",
+        "market_cap": 18600480244,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1831.png"
+        },
+        {
+        "crypto_name": "Bitcoin SV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3602.png"
+        },
+        {
+        "crypto_name": "Cosmos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3794.png"
+        },
+        {
+        "crypto_name": "Ontology",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2566.png"
+        },
+        {
+        "crypto_name": "TAGZ5",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4981.png"
+        },
+        {
+        "crypto_name": "Tezos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2011.png"
+        },
+        {
+        "crypto_name": "Chainlink",
+        "market_cap": 15976208462,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+        "crypto_name": "UNUS SED LEO",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3957.png"
+        },
+        {
+        "crypto_name": "Cronos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3635.png"
+        },
+        {
+        "crypto_name": "Huobi Token",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "Storeum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4162.png"
+        },
+        {
+        "crypto_name": "BNB",
+        "market_cap": 95754488402,
+        "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+        "crypto_name": "Uniswap",
+        "market_cap": 21300516809,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7083.png"
+        },
+        {
+        "crypto_name": "USD Coin",
+        "market_cap": 14377629318,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/5a8229787b5e4c809b5914eef709b59a.png"
+        },
+        {
+        "crypto_name": "Filecoin",
+        "market_cap": 11305911990,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2280.png"
+        },
+        {
+        "crypto_name": "Theta Network",
+        "market_cap": 11189317461,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2416.png"
+        },
+        {
+        "crypto_name": "Wrapped Bitcoin",
+        "market_cap": 9409648997,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3717.png"
+        },
+        {
+        "crypto_name": "Solana",
+        "market_cap": 11604419645,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png"
+        },
+        {
+        "crypto_name": "Terra Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4172.png"
+        },
+        {
+        "crypto_name": "TerraClassicUSD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7129.png"
+        },
+        {
+        "crypto_name": "Binance USD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png"
+        },
+        {
+        "crypto_name": "Avalanche",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        },
+        {
+        "crypto_name": "Polkadot",
+        "market_cap": 34134808697,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6636.png"
+        },
+        {
+        "crypto_name": "Shiba Inu",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png"
+        },
+        {
+        "crypto_name": "Lido Staked ETH",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8085.png"
+        },
+        {
+        "crypto_name": "Dai",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png"
+        },
+        {
+        "crypto_name": "Polygon",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3890.png"
+        },
+        {
+        "crypto_name": "HEX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5015.png"
+        },
+        {
+        "crypto_name": "Wrapped TRON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/18579.png"
+        },
+    ],
+    "2022": [
+    {
+        "crypto_name": "Bitcoin",
+        "color": "#F7931A",
+        "market_cap": 717596901509,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/6fbea0356edd48a4a68a4b877195443c.png"
+        },
+        {
+        "crypto_name": "Litecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2.png"
+        },
+        {
+        "crypto_name": "Namecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3.png"
+        },
+        {
+        "crypto_name": "Peercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5.png"
+        },
+        {
+        "crypto_name": "Terracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4.png"
+        },
+        {
+        "crypto_name": "Devcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7.png"
+        },
+        {
+        "crypto_name": "Novacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6.png"
+        },
+        {
+        "crypto_name": "XRP",
+        "market_cap": 28242161687,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/52.png"
+        },
+        {
+        "crypto_name": "Dogecoin",
+        "market_cap": 16923138964,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png"
+        },
+        {
+        "crypto_name": "Omni",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/83.png"
+        },
+        {
+        "crypto_name": "Nxt",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/66.png"
+        },
+        {
+        "crypto_name": "BlackCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/170.png"
+        },
+        {
+        "crypto_name": "MaidSafeCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/291.png"
+        },
+        {
+        "crypto_name": "Dash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/131.png"
+        },
+        {
+        "crypto_name": "BitShares PTS",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/463.png"
+        },
+        {
+        "crypto_name": "Auroracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/148.png"
+        },
+        {
+        "crypto_name": "Quark",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/53.png"
+        },
+        {
+        "crypto_name": "Zetacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/56.png"
+        },
+        {
+        "crypto_name": "Primecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/42.png"
+        },
+        {
+        "crypto_name": "Counterparty",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/132.png"
+        },
+        {
+        "crypto_name": "Feathercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8.png"
+        },
+        {
+        "crypto_name": "Vertcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/99.png"
+        },
+        {
+        "crypto_name": "Stellar",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+        "crypto_name": "Banx",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/642.png"
+        },
+        {
+        "crypto_name": "Bytecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/372.png"
+        },
+        {
+        "crypto_name": "Monero",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/328.png"
+        },
+        {
+        "crypto_name": "YbCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/95.png"
+        },
+        {
+        "crypto_name": "NuShares",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/699.png"
+        },
+        {
+        "crypto_name": "PayCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/764.png"
+        },
+        {
+        "crypto_name": "MonaCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/213.png"
+        },
+        {
+        "crypto_name": "SuperNET",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/612.png"
+        },
+        {
+        "crypto_name": "Ethereum",
+        "market_cap": 329245687215,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+        "crypto_name": "NEM",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/873.png"
+        },
+        {
+        "crypto_name": "Factom",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1087.png"
+        },
+        {
+        "crypto_name": "HyperSpace",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1125.png"
+        },
+        {
+        "crypto_name": "Emercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "FedoraCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/87.png"
+        },
+        {
+        "crypto_name": "Steem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1230.png"
+        },
+        {
+        "crypto_name": "Augur",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1104.png"
+        },
+        {
+        "crypto_name": "Golem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1455.png"
+        },
+        {
+        "crypto_name": "Zcash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1437.png"
+        },
+        {
+        "crypto_name": "PIVX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1169.png"
+        },
+        {
+        "crypto_name": "Decred",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1168.png"
+        },
+        {
+        "crypto_name": "Stratis",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1343.png"
+        },
+        {
+        "crypto_name": "SingularDTV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1409.png"
+        },
+        {
+        "crypto_name": "Lisk",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1214.png"
+        },
+        {
+        "crypto_name": "EOS",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+        "crypto_name": "Cardano",
+        "market_cap": 25539225299,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+        "crypto_name": "Neo",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+        "crypto_name": "TRON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1958.png"
+        },
+        {
+        "crypto_name": "IOTA",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1720.png"
+        },
+        {
+        "crypto_name": "Tether",
+        "market_cap": 83165743151,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png"
+        },
+        {
+        "crypto_name": "VeChain",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3077.png"
+        },
+        {
+        "crypto_name": "Qtum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1684.png"
+        },
+        {
+        "crypto_name": "OMG Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1808.png"
+        },
+        {
+        "crypto_name": "ICON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2099.png"
+        },
+        {
+        "crypto_name": "Ethereum Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+        "crypto_name": "Bitcoin Cash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1831.png"
+        },
+        {
+        "crypto_name": "Bitcoin SV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3602.png"
+        },
+        {
+        "crypto_name": "Cosmos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3794.png"
+        },
+        {
+        "crypto_name": "Ontology",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2566.png"
+        },
+        {
+        "crypto_name": "TAGZ5",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4981.png"
+        },
+        {
+        "crypto_name": "Tezos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2011.png"
+        },
+        {
+        "crypto_name": "Chainlink",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+        "crypto_name": "UNUS SED LEO",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3957.png"
+        },
+        {
+        "crypto_name": "Cronos",
+        "market_cap": 8852407178,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3635.png"
+        },
+        {
+        "crypto_name": "Huobi Token",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "Storeum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4162.png"
+        },
+        {
+        "crypto_name": "BNB",
+        "market_cap": 61680787861,
+        "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+        "crypto_name": "Uniswap",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7083.png"
+        },
+        {
+        "crypto_name": "USD Coin",
+        "market_cap": 49363696085,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/5a8229787b5e4c809b5914eef709b59a.png"
+        },
+        {
+        "crypto_name": "Filecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2280.png"
+        },
+        {
+        "crypto_name": "Theta Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2416.png"
+        },
+        {
+        "crypto_name": "Wrapped Bitcoin",
+        "market_cap": 10615819824,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3717.png"
+        },
+        {
+        "crypto_name": "Solana",
+        "market_cap": 28422718818,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png"
+        },
+        {
+        "crypto_name": "Terra Classic",
+        "market_cap": 27055505354,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4172.png"
+        },
+        {
+        "crypto_name": "TerraClassicUSD",
+        "market_cap": 18482727595,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7129.png"
+        },
+        {
+        "crypto_name": "Binance USD",
+        "market_cap": 17678324562,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png"
+        },
+        {
+        "crypto_name": "Avalanche",
+        "market_cap": 15323840330,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        },
+        {
+        "crypto_name": "Polkadot",
+        "market_cap": 14339591541,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6636.png"
+        },
+        {
+        "crypto_name": "Shiba Inu",
+        "market_cap": 11080308923,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png"
+        },
+        {
+        "crypto_name": "Lido Staked ETH",
+        "market_cap": 9486700342,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8085.png"
+        },
+        {
+        "crypto_name": "Dai",
+        "market_cap": 8818191590,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png"
+        },
+        {
+        "crypto_name": "Polygon",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3890.png"
+        },
+        {
+        "crypto_name": "HEX",
+        "market_cap": 29411010963,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5015.png"
+        },
+        {
+        "crypto_name": "Wrapped TRON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/18579.png"
+        },
+    ],
+    "2023": [
+    {
+        "crypto_name": "Bitcoin",
+        "color": "#F7931A",
+        "market_cap": 513207340509,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/6fbea0356edd48a4a68a4b877195443c.png"
+        },
+        {
+        "crypto_name": "Litecoin",
+        "market_cap": 6321910482,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2.png"
+        },
+        {
+        "crypto_name": "Namecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3.png"
+        },
+        {
+        "crypto_name": "Peercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5.png"
+        },
+        {
+        "crypto_name": "Terracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4.png"
+        },
+        {
+        "crypto_name": "Devcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7.png"
+        },
+        {
+        "crypto_name": "Novacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6.png"
+        },
+        {
+        "crypto_name": "XRP",
+        "market_cap": 23536605398,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/52.png"
+        },
+        {
+        "crypto_name": "Dogecoin",
+        "market_cap": 9886888827,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png"
+        },
+        {
+        "crypto_name": "Omni",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/83.png"
+        },
+        {
+        "crypto_name": "Nxt",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/66.png"
+        },
+        {
+        "crypto_name": "BlackCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/170.png"
+        },
+        {
+        "crypto_name": "MaidSafeCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/291.png"
+        },
+        {
+        "crypto_name": "Dash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/131.png"
+        },
+        {
+        "crypto_name": "BitShares PTS",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/463.png"
+        },
+        {
+        "crypto_name": "Auroracoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/148.png"
+        },
+        {
+        "crypto_name": "Quark",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/53.png"
+        },
+        {
+        "crypto_name": "Zetacoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/56.png"
+        },
+        {
+        "crypto_name": "Primecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/42.png"
+        },
+        {
+        "crypto_name": "Counterparty",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/132.png"
+        },
+        {
+        "crypto_name": "Feathercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8.png"
+        },
+        {
+        "crypto_name": "Vertcoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/99.png"
+        },
+        {
+        "crypto_name": "Stellar",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/512.png"
+        },
+        {
+        "crypto_name": "Banx",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/642.png"
+        },
+        {
+        "crypto_name": "Bytecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/372.png"
+        },
+        {
+        "crypto_name": "Monero",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/328.png"
+        },
+        {
+        "crypto_name": "YbCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/95.png"
+        },
+        {
+        "crypto_name": "NuShares",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/699.png"
+        },
+        {
+        "crypto_name": "PayCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/764.png"
+        },
+        {
+        "crypto_name": "MonaCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/213.png"
+        },
+        {
+        "crypto_name": "SuperNET",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/612.png"
+        },
+        {
+        "crypto_name": "Ethereum",
+        "market_cap": 217184216647,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        },
+        {
+        "crypto_name": "NEM",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/873.png"
+        },
+        {
+        "crypto_name": "Factom",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1087.png"
+        },
+        {
+        "crypto_name": "HyperSpace",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1125.png"
+        },
+        {
+        "crypto_name": "Emercoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "FedoraCoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/87.png"
+        },
+        {
+        "crypto_name": "Steem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1230.png"
+        },
+        {
+        "crypto_name": "Augur",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1104.png"
+        },
+        {
+        "crypto_name": "Golem",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1455.png"
+        },
+        {
+        "crypto_name": "Zcash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1437.png"
+        },
+        {
+        "crypto_name": "PIVX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1169.png"
+        },
+        {
+        "crypto_name": "Decred",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1168.png"
+        },
+        {
+        "crypto_name": "Stratis",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1343.png"
+        },
+        {
+        "crypto_name": "SingularDTV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1409.png"
+        },
+        {
+        "crypto_name": "Lisk",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1214.png"
+        },
+        {
+        "crypto_name": "EOS",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1765.png"
+        },
+        {
+        "crypto_name": "Cardano",
+        "market_cap": 12499337235,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png"
+        },
+        {
+        "crypto_name": "Neo",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1376.png"
+        },
+        {
+        "crypto_name": "TRON",
+        "market_cap": 6935976144,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1958.png"
+        },
+        {
+        "crypto_name": "IOTA",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1720.png"
+        },
+        {
+        "crypto_name": "Tether",
+        "market_cap": 83066949523,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png"
+        },
+        {
+        "crypto_name": "VeChain",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3077.png"
+        },
+        {
+        "crypto_name": "Qtum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1684.png"
+        },
+        {
+        "crypto_name": "OMG Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1808.png"
+        },
+        {
+        "crypto_name": "ICON",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2099.png"
+        },
+        {
+        "crypto_name": "Ethereum Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1321.png"
+        },
+        {
+        "crypto_name": "Bitcoin Cash",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1831.png"
+        },
+        {
+        "crypto_name": "Bitcoin SV",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3602.png"
+        },
+        {
+        "crypto_name": "Cosmos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3794.png"
+        },
+        {
+        "crypto_name": "Ontology",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2566.png"
+        },
+        {
+        "crypto_name": "TAGZ5",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4981.png"
+        },
+        {
+        "crypto_name": "Tezos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2011.png"
+        },
+        {
+        "crypto_name": "Chainlink",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/1975.png"
+        },
+        {
+        "crypto_name": "UNUS SED LEO",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3957.png"
+        },
+        {
+        "crypto_name": "Cronos",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3635.png"
+        },
+        {
+        "crypto_name": "Huobi Token",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2502.png"
+        },
+        {
+        "crypto_name": "Storeum",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4162.png"
+        },
+        {
+        "crypto_name": "BNB",
+        "market_cap": 47492002140,
+        "logo_link": "https://s3.coinmarketcap.com/static/img/portraits/62876e92bedeb632050eb4ae.png"
+        },
+        {
+        "crypto_name": "Uniswap",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7083.png"
+        },
+        {
+        "crypto_name": "USD Coin",
+        "market_cap": 29059951923,
+        "logo_link": "https://s3.coinmarketcap.com/static-gravity/image/5a8229787b5e4c809b5914eef709b59a.png"
+        },
+        {
+        "crypto_name": "Filecoin",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2280.png"
+        },
+        {
+        "crypto_name": "Theta Network",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/2416.png"
+        },
+        {
+        "crypto_name": "Wrapped Bitcoin",
+        "market_cap": 4136060797,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3717.png"
+        },
+        {
+        "crypto_name": "Solana",
+        "market_cap": 7631148930,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png"
+        },
+        {
+        "crypto_name": "Terra Classic",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4172.png"
+        },
+        {
+        "crypto_name": "TerraClassicUSD",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/7129.png"
+        },
+        {
+        "crypto_name": "Binance USD",
+        "market_cap": 5302761488,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png"
+        },
+        {
+        "crypto_name": "Avalanche",
+        "market_cap": 4716406607,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png"
+        },
+        {
+        "crypto_name": "Polkadot",
+        "market_cap": 6227950014,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/6636.png"
+        },
+        {
+        "crypto_name": "Shiba Inu",
+        "market_cap": 5013616874,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png"
+        },
+        {
+        "crypto_name": "Lido Staked ETH",
+        "market_cap": 11996878716,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/8085.png"
+        },
+        {
+        "crypto_name": "Dai",
+        "market_cap": 4818126804,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png"
+        },
+        {
+        "crypto_name": "Polygon",
+        "market_cap": 8258846206,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/3890.png"
+        },
+        {
+        "crypto_name": "HEX",
+        "market_cap": 0,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/5015.png"
+        },
+        {
+        "crypto_name": "Wrapped TRON",
+        "market_cap": 7819742707,
+        "logo_link": "https://s2.coinmarketcap.com/static/img/coins/64x64/18579.png"
+        },
+    ]
+    }
+
+    chart.data = JSON.parse(JSON.stringify(allData[year]));
+    categoryAxis.zoom({ start: 0, end: 1 / chart.data.length });
+
+    series.events.on("inited", function() {
+    setTimeout(function() {
+        playButton.isActive = true; // this starts interval
+    }, 0)
+    })
+</script>
+</html>
